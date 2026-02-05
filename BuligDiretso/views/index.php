@@ -1,6 +1,6 @@
 <?php
 session_start ();
-require_once '../config/config.php';
+require_once CONFIG_PATH . 'config.php';
 
 $action = $_GET['action'] ?? 'home';
 
@@ -19,4 +19,5 @@ switch($action){
     
 
 }
+
 ?>
