@@ -68,3 +68,4 @@ function showError() {
         "Location access denied.";
 
 }
+
