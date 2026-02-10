@@ -141,7 +141,7 @@
      */
     public function showSafetyGuides() {
         $this->requireLogin();
-        $pageTitle = "Safety Guides - Silent Signal";
+        $pageTitle = "Safety Guides - Bulig Diretso";
 
         // Shared header/footer data
         extract($this->getSharedData());

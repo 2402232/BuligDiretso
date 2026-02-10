@@ -60,7 +60,7 @@
             </a>
 
             <!-- Track Rescue -->
-            <a href="track-rescue.php" class="card">
+            <a href="index.php?action=emergency-tracking" class="card">
                 <div class="card-circle blue">
                     <i class="ri-send-plane-2-line"></i>
                 </div>
@@ -71,7 +71,7 @@
             </a>
 
             <!-- Safety Guides -->
-            <a href="safety-guides.php" class="card">
+            <a href="index.php?action=safety-guides" class="card">
                 <div class="card-circle green">
                     <i class="ri-book-open-line"></i>
                 </div>

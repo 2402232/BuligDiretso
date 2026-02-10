@@ -60,8 +60,7 @@ switch ($action) {
         require_once CONTROLLER_PATH . 'UserController.php';
         (new UserController())->showSafetyGuides();
         break;
-
-            
+     
     // Admin module
     case 'admin-dashboard':
         require_once CONTROLLER_PATH . 'AdminController.php';
