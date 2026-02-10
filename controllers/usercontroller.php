@@ -1,5 +1,5 @@
 <?php 
-    class userController {
+    class UserController {
 
     // Shared data for header and footer
     protected $navItems;
