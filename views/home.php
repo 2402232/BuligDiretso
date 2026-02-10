@@ -1,5 +1,6 @@
 <body>
-    <div class="hero-container">
+    <?php  require_once VIEW_PATH . 'includes/header.php';?>
+    <div class="hero-container" id="getStarted">
         <div class="warning-alarm">
             <i class="ri-alarm-warning-fill"></i>
             <p>24/7  Emergency Support available</p>
@@ -11,7 +12,7 @@
                 location detection and comprehensive first aid guides all in one platform.</p>
             </div>
                 <div class="hero-buttons">
-                    <a href="#" class="cta-button report">Report Emergency</a>
+                    <a href="#" class="cta-button report" id="reportBtn">Report Emergency</a>
                     <a href="index.php?action=login" class="cta-button learn-more">Get Started</a>
                 </div>
 
@@ -62,64 +63,42 @@
         <!-- FEATURES -->
         <section class="features" id="features">
 
-            <h2>Our Features</h2>
+            <h2 class="title">Our Features</h2>
 
             <div class="feature-grid">
-
-                <div class="feature-card">
-                    <i class="ri-error-warning-line"></i>
-                    <h3>Quick Reporting</h3>
-                    <p>Send emergency reports instantly.</p>
-                </div>
-
-                <div class="feature-card">
-                    <i class="ri-map-pin-line"></i>
-                    <h3>Auto Location</h3>
-                    <p>GPS detected automatically.</p>
-                </div>
-
-                <div class="feature-card">
-                    <i class="ri-radar-line"></i>
-                    <h3>Live Tracking</h3>
-                    <p>Track responders in real-time.</p>
-                </div>
-
-                <div class="feature-card">
-                    <i class="ri-book-open-line"></i>
-                    <h3>First Aid Guide</h3>
-                    <p>Step-by-step instructions.</p>
-                </div>
-
+                <?php foreach ($features as $feature): ?>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="<?php echo $feature['icon']; ?>"></i>
+                        </div>
+                        <h3 class="feature-title"><?php echo $feature['title']; ?></h3>
+                        <p class="feature-desc"><?php echo $feature['desc']; ?></p>
+                        <div class="feature-link">
+                            <a href="#">
+                                <?php echo $feature['link']; ?>
+                                <i class="<?php echo $feature['arrow']; ?>"></i>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
         </section>
 
 
         <!-- HOW IT WORKS -->
-        <section class="steps">
+        <section class="steps" id="howItWorks">
 
-            <h2>How It Works</h2>
+            <h2 class="title"> How It Works</h2>
 
             <div class="step-grid">
-
-                <div class="step">
-                    <span>1</span>
-                    <h3>Report</h3>
-                    <p>Submit emergency report.</p>
-                </div>
-
-                <div class="step">
-                    <span>2</span>
-                    <h3>Respond</h3>
-                    <p>Nearest responder accepts.</p>
-                </div>
-
-                <div class="step">
-                    <span>3</span>
-                    <h3>Help</h3>
-                    <p>Track and receive help.</p>
-                </div>
-
+                <?php foreach ($how_it_works as $hiw): ?>
+                    <div class="step">
+                       <span class="step-number"> <?php echo $hiw['number']; ?></span>
+                        <h3 class="step-title"><?php echo $hiw['title']; ?></h3>
+                        <p class="step-desc"><?php echo $hiw['desc']; ?></p>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
         </section>
@@ -142,9 +121,9 @@
 
         </div>
 
-
+        <?php  require_once VIEW_PATH . 'includes/footer.php';?>    
         <!-- JS -->
         <script src="<?php echo ASSETS_PATH . 'js/home.js'; ?>"></script>
 
-    </body>
 </body>
+

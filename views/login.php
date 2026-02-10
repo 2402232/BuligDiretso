@@ -1,7 +1,12 @@
 <?php include 'views/includes/header.php'; ?>
 <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/login.css'; ?>">
 
-<div class="container">
+
+<div class="main-container">
+    <div class="back-to-home">
+        <a class="back-link" href="index.php?action=home">← Back to Home</a>
+    </div>
+
     <div class="login-wrapper">
         <div class="login-card">
 

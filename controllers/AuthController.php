@@ -1,13 +1,22 @@
 <?php
+require_once 'HomeController.php';
 
-class AuthController {
+class AuthController extends HomeController {
     public function showLogin() {
         $pageTitle = "Login - BuligDiretso";
+
+        // Shared header/footer data
+        extract($this->getSharedData());
+
         require_once VIEW_PATH . 'login.php';
     }
 
     public function showSignup() {
         $pageTitle = "Sign Up - BuligDiretso";
+
+        // Shared header/footer data
+        extract($this->getSharedData());
+
         require_once VIEW_PATH . 'signup.php';
     }
 

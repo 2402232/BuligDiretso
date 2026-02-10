@@ -1,10 +1,13 @@
 <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/footer.css'; ?>">
-<footer class="footer">
+<footer class="footer" id="footer">
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
                 <div class="footer-title">
-                    <h2>Emergency Response</h2>
+                   <a href="<?php echo BASE_URL; ?>index.php?action=dashboard" class="header-logo">
+                        <img src="<?php echo ASSETS_PATH . 'images/logo.png'; ?>" alt="Logo" class="logo">
+                        <span>BuligDiretso.</span>
+                    </a>
                 </div>
 
                 <div class="footer-desc">
@@ -16,10 +19,13 @@
                     <h2>Platform</h2>
                 </div>
                 <ul class="footer-links">
-                    <li><a href="#">Features</a></li>
-                    <li><a href="#">How It Works</a></li>
-                    <li><a href="#">Dashboard</a></li>
-                    <li><a href="#">Safety Guide</a></li>
+                    <?php foreach ($footerLinks as $link): ?>
+                        <li>
+                            <a href="<?php echo BASE_URL; ?>index.php?action=<?php echo $link['action']; ?>">
+                                <?php echo $link['label']; ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
             <div class="footer-section">
@@ -27,10 +33,13 @@
                     <h2>Resources</h2>
                 </div>
                 <ul class="footer-links"> 
-                    <li><a href="#">First Aid</a></li>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Support</a></li>
+                    <?php foreach ($footerResources as $link): ?>
+                        <li>
+                            <a href="<?php echo BASE_URL; ?>index.php?action=<?php echo $link['href']; ?>">
+                                <?php echo $link['label']; ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
             <div class="footer-section">
@@ -38,12 +47,13 @@
                     <h2>Emergency Hotline</h2>
                 </div>
                 <ul class="footer-links">
-                    <li><a href="#">LDRRMO 0951 682 1504</a></li>
-                    <li><a href="#"> MHO Isabela 0963 156 6032</a></li>
-                    <li><a href="#"> ILASMDH 0947 415 4761</a></li>
-                    <li><a href="#"> PNP Isabela 0999 659 0677 </a></li>
-                    <li><a href="#"> NOCECO 0998 570 2725</a></li>
-                    <li><a href="#"> BFP (Bureau of Fire Protection) 0970 465 9383</a></li> 
+                     <?php foreach ($footerHotline as $link): ?>
+                        <li>
+                            <a href="<?php echo BASE_URL; ?>index.php?action=<?php echo $link['href']; ?>">
+                                <?php echo $link['label']; ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
                 

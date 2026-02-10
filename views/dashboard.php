@@ -1,80 +1,108 @@
+<?php require_once VIEW_PATH . 'includes/header.php';?>
 <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/dashboard.css'; ?>">
 
-<div class="dashboard-container">
-    <!-- Left Sidebar -->
-    <div class="sidebar">
-        <a href="#" class="sidebar-link active">
-            <span>(icon waley pa)</span> Back to Home
-        </a>
-        <a href="#" class="sidebar-link">
-            <span>(icon waley pa)</span> Emergency Dashboard
-        </a>
+
+<div class="page-wrapper">
+    
+    <!-- Top Bar -->
+    <div class="top-bar">
+         <!-- Red Emergency Banner -->
+        
+             <div class="banner-text">
+                <i class="ri-error-warning-line"></i> 
+                <h2>Emergency Response System</h2>
+             </div>
+             
+             <div class="banner-icon">
+                <i class="ri-group-fill"></i>
+                <i class="ri-pulse-line"></i>
+             </div>
+         
     </div>
 
-    <!-- Main Dashboard Area -->
-    <div class="dashboard-content">
-        <h1>Emergency Dashboard</h1>
-
-        <!-- Status Summary Cards -->
-        <div class="status-cards">
-            <div class="card critical">
-                <p>Critical</p>
-                <h2>2</h2>
+     <!-- Main Content -->
+    <div class="content-box">
+        
+        <!-- Red Emergency Banner -->
+        <div class="red-banner">
+            <div class="red-banner-text">
+                <h2>Emergency Response</h2>
+                <p>Quick access to help when you need it most</p>
             </div>
-            <div class="card high-priority">
-                <p>High Priority</p>
-                <h2>2</h2>
-            </div>
-            <div class="card moderate">
-                <p>Moderate</p>
-                <h2>2</h2>
-            </div>
-            <div class="card low-priority">
-                <p>Low Priority</p>
-                <h2>1</h2>
+            <div class="red-banner-icon">
+                <i class="ri-error-warning-line"></i>
             </div>
         </div>
 
-        <!-- Filter Buttons -->
-        <div class="filters">
-            <button class="filter-btn active">All emergencies</button>
-            <button class="filter-btn">CRITICAL</button>
-            <button class="filter-btn">MODERATE</button>
-            <button class="filter-btn">RESOLVED</button>
-            <button class="filter-btn">UNTRACKED</button>
-        </div>
-
-        <!-- Emergency List -->
-        <div class="emergency-list">
-            <?php
-            // Sample emergency data (later replace with database)
-            $emergencies = [
-                ['id' => 'ER-KP376', 'status' => 'CRITICAL', 'type' => 'Medical', 'desc' => 'Heart attack at City', 'loc' => 'Central St.', 'color' => '#E74C3C'],
-                ['id' => 'ER-GH201', 'status' => 'MODERATE', 'type' => 'Fire', 'desc' => 'Kitchen fire', 'loc' => '5th Ave', 'color' => '#F39C12'],
-                ['id' => 'ER-TU190', 'status' => 'CRITICAL', 'type' => 'Medical', 'desc' => 'Severe bleeding', 'loc' => 'Park Rd.', 'color' => '#E74C3C'],
-                ['id' => 'ER-QP443', 'status' => 'MODERATE', 'type' => 'Crime', 'desc' => 'Robbery in progress', 'loc' => 'Market St.', 'color' => '#F39C12'],
-                ['id' => 'ER-MN928', 'status' => 'RESOLVED', 'type' => 'Traffic', 'desc' => 'Car accident', 'loc' => 'Highway 5', 'color' => '#27AE60'],
-                ['id' => 'ER-FT837', 'status' => 'MODERATE', 'type' => 'Medical', 'desc' => 'Broken arm', 'loc' => 'School', 'color' => '#F39C12']
-            ];
-
-            foreach ($emergencies as $em) {
-                ?>
-                <div class="emergency-item">
-                    <div class="emergency-top">
-                        <span class="em-id"><?php echo $em['id']; ?></span>
-                        <span class="em-status" style="background-color: <?php echo $em['color']; ?>">
-                            <?php echo $em['status']; ?>
-                        </span>
-                        <span class="em-type"><?php echo $em['type']; ?></span>
-                    </div>
-                    <div class="emergency-info">
-                        <p class="em-desc"><?php echo $em['desc']; ?></p>
-                        <p class="em-loc">Location: <?php echo $em['loc']; ?></p>
-                    </div>
+        <!-- Action Cards -->
+        <div class="card-list">
+            
+            <!-- Report Emergency -->
+            <a href="index.php?action=report-system" class="card">
+                <div class="card-circle red">
+                    <i class="ri-phone-fill"></i>
                 </div>
-                <?php
-            }
-            ?>
+                <div class="card-info"> 
+                    <h3>Report Emergency</h3>
+                    <p>For immediate help</p>
+                </div>
+            </a>
+
+            <!-- Emergency Dashboard -->
+            <a href="index.php" class="card">
+                <div class="card-circle purple">
+                    <i class="ri-pulse-line"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Emergency Dashboard</h3>
+                    <p>View all emergencies</p>
+                </div>
+            </a>
+
+            <!-- Track Rescue -->
+            <a href="track-rescue.php" class="card">
+                <div class="card-circle blue">
+                    <i class="ri-send-plane-2-line"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Track Rescue</h3>
+                    <p>24hr response status</p>
+                </div>
+            </a>
+
+            <!-- Safety Guides -->
+            <a href="safety-guides.php" class="card">
+                <div class="card-circle green">
+                    <i class="ri-book-open-line"></i>
+                </div>
+                <div class="card-info">
+                    <h3>First Aid & Safety Guides</h3>
+                    <p>Learn emergency care procedures</p>
+                </div>
+            </a>
+
         </div>
+
+        <div class="hotline-box">
+            <span class="hotline-icon">
+                <i class="ri-error-warning-line"></i>
+            </span>
+            <div class="hotline-text">
+                <strong>Emergency Hotline</strong>
+                <p>Available 24/7 for immediate support</p>
+            </div>
+        </div>
+
     </div>
+
+
+
 </div>
+
+<?php include 'views/includes/footer.php'; ?>
+
+
+
+
+
+

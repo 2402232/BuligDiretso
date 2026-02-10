@@ -35,11 +35,34 @@ switch ($action) {
         $controller->processSignup();
         break;
 
+    // User module
     case 'dashboard':
         require_once CONTROLLER_PATH . 'UserController.php';
         (new UserController())->dashboard();
         break;
 
+    case 'report-system':
+        require_once CONTROLLER_PATH . 'UserController.php';
+        (new UserController())->showReportSystem();
+        break;
+        
+    case 'emergency-dashboard':
+        require_once CONTROLLER_PATH . 'UserController.php';
+        (new UserController())->showEmergencyDashboard();
+        break;
+
+    case 'tracking':
+        require_once CONTROLLER_PATH . 'UserController.php';
+        (new UserController())->showTracking();
+        break;
+
+    case 'safety-guides':
+        require_once CONTROLLER_PATH . 'UserController.php';
+        (new UserController())->showSafetyGuides();
+        break;
+
+            
+    // Admin module
     case 'admin-dashboard':
         require_once CONTROLLER_PATH . 'AdminController.php';
         (new AdminController())->adminDashboard();
@@ -49,4 +72,5 @@ switch ($action) {
         require_once CONTROLLER_PATH . 'HomeController.php';
         (new HomeController())->index();
         break;
+    
 }

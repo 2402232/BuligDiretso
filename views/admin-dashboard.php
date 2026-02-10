@@ -11,9 +11,11 @@
     </div>
 
     <!-- Back Link -->
-    <div class="back-nav">
-        <a href="index.php" class="back-link">← Back to Home</a>
-    </div>
+    <div class="Back_Btn">
+    <a href="<?php echo BASE_URL; ?>index.php?action=home" class="back-btn">
+            <span class="arrow">&larr;</span>Back to Home
+    </a>
+</div>
 
     <!-- Tab Navigation -->
     <div class="tab-nav">
