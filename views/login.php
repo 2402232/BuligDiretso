@@ -20,7 +20,7 @@
             </div>
 
             <!-- FORM -->
-            <form method="POST" action="">
+            <form action="<?php echo BASE_URL; ?>index.php?action=process_login" method="POST">
                 <label>Email Address<span>*</span></label>
                 <div class="input-group">
                     <span class="icon">✉️</span>

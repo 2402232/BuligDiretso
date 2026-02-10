@@ -23,12 +23,24 @@ switch ($action) {
         (new AuthController())->showSignup();
         break;
 
-    case 'dashboard':
+    case 'process_login':
         require_once CONTROLLER_PATH . 'AuthController.php';
-        (new AuthController())->showDashboard();
+        $controller = new AuthController();
+        $controller->processLogin();
+        break;
+        
+    case 'process_signup':
+        require_once CONTROLLER_PATH . 'AuthController.php';
+        $controller = new AuthController();
+        $controller->processSignup();
         break;
 
-    case 'admin':
+    case 'dashboard':
+        require_once CONTROLLER_PATH . 'UserController.php';
+        (new UserController())->dashboard();
+        break;
+
+    case 'admin-dashboard':
         require_once CONTROLLER_PATH . 'AdminController.php';
         (new AdminController())->adminDashboard();
         break;

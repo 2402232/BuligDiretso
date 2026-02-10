@@ -18,12 +18,18 @@
         </div>
 
         <!-- FORM -->
-        <form method="POST" action="">
+        <form action="<?php echo BASE_URL; ?>index.php?action=process_signup" method="POST">
 
-            <label>Full Name<span>*</span></label>
+            <label>First Name<span>*</span></label>
             <div class="input-group">
                 <span class="icon">👤</span>
-                <input type="text" name="fullname" required>
+                <input type="text" name="first_name" required>
+            </div>
+
+            <label>Last Name<span>*</span></label>
+            <div class="input-group">
+                <span class="icon">👤</span>
+                <input type="text" name="last_name" required>
             </div>
 
             <label>Phone Number<span>*</span></label>
@@ -50,6 +56,15 @@
                 <span class="icon">✉️</span>
                 <input type="email" name="email" required>
             </div>
+
+            
+            <label for="role">Role</label>
+            <select id="role" name="role" class="input-group" required>
+                <option value="" disabled selected>Select Role</option>
+                <option value="pwd">User</option>
+                <option value="admin">Administrator</option>
+            </select>
+            
 
             <label>Password<span>*</span></label>
             <div class="input-group">
