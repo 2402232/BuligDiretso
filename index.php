@@ -35,6 +35,12 @@ switch ($action) {
         $controller->processSignup();
         break;
 
+    case 'logout':
+        require_once CONTROLLER_PATH . 'AuthController.php';
+        $controller = new AuthController();
+        $controller->logout();
+        break;
+
     // User module
     case 'dashboard':
         require_once CONTROLLER_PATH . 'UserController.php';

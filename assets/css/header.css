@@ -47,6 +47,7 @@ header {
     gap: 10px;
     margin: 0;
     padding: 0;
+    align-items: center;
 }
 
 .nav-item {
@@ -57,6 +58,9 @@ header {
     font-size: 16px;
     font-weight: 500;
     transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .nav-item:hover {
@@ -67,6 +71,21 @@ header {
 .nav-item.active {
     color: white;
     background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── LOGOUT BUTTON ── */
+.nav-item.logout-btn {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+}
+
+.nav-item.logout-btn:hover {
+    background: rgba(231, 76, 60, 0.3);
+    border-color: rgba(231, 76, 60, 0.6);
+}
+
+.nav-item.logout-btn i {
+    font-size: 18px;
 }
 
 /* ── HAMBURGER BUTTON ── */
@@ -122,7 +141,7 @@ header {
 }
 
 .mobile-menu.open {
-    max-height: 400px;
+    max-height: 500px;
     padding: 8px 0 14px;
 }
 
@@ -135,7 +154,9 @@ header {
 }
 
 .mobile-nav-item {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: white;
     text-decoration: none;
     padding: 12px 30px;
@@ -154,8 +175,24 @@ header {
     padding-left: 27px;
 }
 
+/* ── LOGOUT BUTTON IN MOBILE ── */
+.mobile-nav-item.logout-mobile {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ff6b6b;
+}
+
+.mobile-nav-item.logout-mobile:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.mobile-nav-item.logout-mobile i {
+    font-size: 18px;
+}
+
 /* ── RESPONSIVE ── */
-@media screen and (max-width: 850px) {
+@media screen and (max-width: 950px) {
     .nav-links {
         display: none;
     }

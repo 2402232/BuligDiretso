@@ -30,6 +30,14 @@
                         </a>
                     </li>
                 <?php endforeach; ?>
+                
+                <?php if (isset($_SESSION['user_id']) || isset($_SESSION['logged_in'])): ?>
+                    <li>
+                        <a href="<?php echo BASE_URL; ?>index.php?action=logout" class="nav-item logout-btn">
+                            <i class="ri-logout-box-line"></i> Logout
+                        </a>
+                    </li>
+                <?php endif; ?>
             </ul>
 
             <!-- Hamburger button -->
@@ -52,6 +60,14 @@
                         </a>
                     </li>
                 <?php endforeach; ?>
+                
+                <?php if (isset($_SESSION['user_id']) || isset($_SESSION['logged_in'])): ?>
+                    <li>
+                        <a href="<?php echo BASE_URL; ?>index.php?action=logout" class="mobile-nav-item logout-mobile">
+                            <i class="ri-logout-box-line"></i> Logout
+                        </a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </header>
