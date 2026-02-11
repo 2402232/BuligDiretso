@@ -1,0 +1,123 @@
+/* tracking.css */
+
+/* ── WRAPPER ── */
+.tracking-wrapper {
+    padding-top: 84px;
+    min-height: 100vh;
+    background: #EEF2F6;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 60px;
+    box-sizing: border-box;
+}
+
+/* ── BACK LINK ── */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: #667085;
+    text-decoration: none;
+    margin-bottom: 18px;
+    margin-top: 20px;
+    display: block;
+    transition: color 0.15s;
+}
+
+.back-link:hover {
+    color: #12375A;
+}
+
+/* ── CARD ── */
+.tracking-card {
+    background: #FFFFFF;
+    border-radius: 14px;
+    border: 1px solid #E4E7EC;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    max-width: 860px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* ── CARD HEADER ── */
+.tracking-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 28px 18px;
+    border-bottom: 1px solid #F2F4F7;
+}
+
+.tracking-header h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1C2333;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.tracking-icon {
+    font-size: 20px;
+    color: #3B82F6;
+}
+
+/* ── CARD BODY ── */
+.tracking-body {
+    padding: 60px 28px;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 52px;
+    color: #D1D5DB;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.empty-text {
+    font-size: 0.88rem;
+    color: #98A2B3;
+    margin: 0;
+}
+
+.report-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #E53935;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.report-link:hover {
+    color: #B71C1C;
+    text-decoration: underline;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+    .tracking-wrapper {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .tracking-header {
+        padding: 16px 18px 14px;
+    }
+
+    .tracking-body {
+        padding: 48px 18px;
+    }
+}
