@@ -51,7 +51,7 @@ switch ($action) {
         (new UserController())->showEmergencyDashboard();
         break;
 
-    case 'tracking':
+    case 'emergency-tracking':
         require_once CONTROLLER_PATH . 'UserController.php';
         (new UserController())->showEmergencyTracking();
         break;
@@ -65,6 +65,16 @@ switch ($action) {
     case 'admin-dashboard':
         require_once CONTROLLER_PATH . 'AdminController.php';
         (new AdminController())->adminDashboard();
+        break;
+
+    case 'users':
+        require_once CONTROLLER_PATH . 'AdminController.php';
+        (new AdminController())->usersNeedingHelp();
+        break;
+
+    case 'responders':
+        require_once CONTROLLER_PATH . 'AdminController.php';
+        (new AdminController())->responders();
         break;
 
     default:

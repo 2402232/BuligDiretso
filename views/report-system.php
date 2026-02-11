@@ -25,7 +25,7 @@
         <a class="back-link" href="index.php?action=dashboard">← Back to Home</a>
 
         <div class="section-head">
-            <span class="sh-icon">⚠️</span>
+            <span class="sh-icon"><i class="ri-alert-line"></i></span>
             Report Emergency
         </div>
 

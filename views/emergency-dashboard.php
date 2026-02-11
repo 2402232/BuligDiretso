@@ -3,6 +3,8 @@
 
   <!-- Main Dashboard Area -->
     <div class="dashboard-content">
+        <a class="back-link" href="index.php?action=dashboard">← Back to Home</a>
+        
         <h1>Emergency Dashboard</h1>
 
         <!-- Status Summary Cards -->

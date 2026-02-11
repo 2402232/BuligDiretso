@@ -3,9 +3,7 @@
 
 <div class="tracking-wrapper">
 
-    <a class="back-link" href="<?php echo BASE_URL; ?>dashboard.php?action=dashboard">
-        ← Back to Home
-    </a>
+    <a class="back-link" href="index.php?action=dashboard">← Back to Home</a>
 
     <div class="tracking-card">
 

@@ -1,28 +1,22 @@
 <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/admin-dashboard.css'; ?>">
 
+<?php require_once VIEW_PATH . 'includes/header.php'; ?>
 <div class="admin-wrapper">
     
-    <!-- Top Header -->
-    <div class="top-header">
-        <span class="admin-badge">
-            <span class="badge-icon"></span>
-            Admin Dashboard
-        </span>
+    <!-- Top Bar -->
+    <div class="top-bar">
+         <!-- Red Emergency Banner -->
+        
+             <div class="banner">
+                <i class="ri-shield-line"></i>
+                <div class="banner-text">
+                    <h2>Admin Dashboard</h2>
+                    <p>Emergency Response System</p>
+                </div>
+             </div>
     </div>
 
-    <!-- Back Link -->
-    <div class="Back_Btn">
-    <a href="<?php echo BASE_URL; ?>index.php?action=home" class="back-btn">
-            <span class="arrow">&larr;</span>Back to Home
-    </a>
-</div>
 
-    <!-- Tab Navigation -->
-    <div class="tab-nav">
-        <button class="tab-btn active">Overview</button>
-        <button class="tab-btn">Users Needing Help</button>
-        <button class="tab-btn">Responders</button>
-    </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
@@ -69,55 +63,52 @@
 
     </div>
 
-    <!-- Active Emergencies Section -->
-    <div class="section-header">
-        <span class="section-icon"></span>
-        <h2>Active Emergencies-User Needing Help</h2>
-    </div>
-
-    <!-- Emergency List -->
-    <div class="emergency-list">
-        
-        <?php
-        // Sample emergency data
-        $emergencies = [
-            ['id' => 'ER-A373K', 'status' => 'CRITICAL', 'badge' => 'Responding', 'name' => 'Carlos Mendoza', 'type' => 'Medical', 'time' => '2024-02-08 13:45', 'location' => 'Makati City', 'details' => ['Chest pain', 'Difficulty breathing', 'Patient conscious but in severe pain']],
-            ['id' => 'ER-A373K', 'status' => 'MODERATE', 'badge' => 'Responding', 'name' => 'Carlos Mendoza', 'type' => 'Fire', 'time' => '2024-02-08 13:30', 'location' => 'Quezon City', 'details' => ['Kitchen fire', 'Smoke detected', 'Residents evacuating']],
-            ['id' => 'ER-A373K', 'status' => 'CRITICAL', 'badge' => 'Responding', 'name' => 'Carlos Mendoza', 'type' => 'Medical', 'time' => '2024-02-08 13:20', 'location' => 'Manila', 'details' => ['Car accident', 'Multiple injuries', 'Road blocked, require police assist']],
-            ['id' => 'ER-A373K', 'status' => 'RESOLVED', 'badge' => 'Pending', 'name' => 'Carlos Mendoza', 'type' => 'Medical', 'time' => '2024-02-08 13:10', 'location' => 'Pasig', 'details' => ['Resolved', 'Patient stabilized']]
-        ];
-
-        foreach ($emergencies as $em) {
-            $statusClass = strtolower(str_replace(' ', '-', $em['status']));
-            ?>
-            <div class="emergency-item">
-                <div class="em-header">
-                    <div class="em-left">
-                        <span class="em-id"><?php echo $em['id']; ?></span>
-                        <span class="em-status <?php echo $statusClass; ?>"><?php echo $em['status']; ?></span>
-                        <span class="em-badge"><?php echo $em['badge']; ?></span>
+    <div class="active-emergencies">
+        <!-- Active Emergencies Section -->
+        <div class="section-header">
+            <span class="section-icon"><i class="ri-error-warning-line"></i></span>
+            <h2>Active Emergencies - User Needing Help</h2>
+        </div>
+    
+        <!-- Emergency List -->
+        <div class="emergency-list">
+            
+            <?php
+    
+            foreach ($emergencies as $em) {
+                $statusClass = strtolower(str_replace(' ', '-', $em['status']));
+                $assignedClass = strtolower(str_replace(' ', '-', $em['assign']));
+                ?>
+                <div class="emergency-item">
+                    <div class="em-header">
+                        <div class="em-left">
+                            <span class="em-id"><?php echo $em['id']; ?></span>
+                            <span class="em-status <?php echo $statusClass; ?>"><?php echo $em['status']; ?></span>
+                            <span class="em-badge"><?php echo $em['badge']; ?></span>
+                        </div>
+                    </div>
+                    <div class="em-body">
+                        <p class="em-name">User: <?php echo $em['name']; ?></p>
+                        <p class="em-detail"><span class="icon"></span> <?php echo $em['type']; ?></p>
+                        <p class="em-detail"><span class="icon"></span> <?php echo $em['time']; ?></p>
+                        <p class="em-detail"><span class="icon"></span> <?php echo $em['location']; ?></p>
+                        <ul class="em-details-list">
+                            <?php foreach ($em['details'] as $detail) { ?>
+                                <li><?php echo $detail; ?></li>
+                            <?php } ?>
+                        </ul>
+                    </div>
+                    <div class="em-actions">
+                        <!-- Assign Responders Button -->
+                        <button class="assign-btn <?php echo $assignedClass; ?>"><?php echo $em['assign'] . $em['responder']; ?></button>
                     </div>
                 </div>
-                <div class="em-body">
-                    <p class="em-name">User: <?php echo $em['name']; ?></p>
-                    <p class="em-detail"><span class="icon"></span> <?php echo $em['type']; ?></p>
-                    <p class="em-detail"><span class="icon"></span> <?php echo $em['time']; ?></p>
-                    <p class="em-detail"><span class="icon"></span> <?php echo $em['location']; ?></p>
-                    <ul class="em-details-list">
-                        <?php foreach ($em['details'] as $detail) { ?>
-                            <li><?php echo $detail; ?></li>
-                        <?php } ?>
-                    </ul>
-                </div>
-            </div>
-            <?php
-        }
-        ?>
-
+                <?php
+            }
+            ?>
+    
+        </div>
     </div>
-
-    <!-- Assign Responders Button -->
-    <button class="assign-btn">Assign Responders</button>
 
     <!-- Bottom Stats Section -->
     <div class="bottom-stats">
@@ -188,4 +179,5 @@
 
 </div>
 
+<?php require_once VIEW_PATH . 'includes/footer.php'; ?>
 

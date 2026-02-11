@@ -26,7 +26,7 @@
             ['action' => 'dashboard', 'label' => 'Home'],
             ['action' => 'report-system', 'label' => 'Report'],
             ['action' => 'emergency-dashboard','label' => 'Emergency Dashboard'],
-            ['action' => 'tracking', 'label' => 'Tracking'],
+            ['action' => 'emergency-tracking', 'label' => 'Tracking'],
             ['action' => 'safety-guides', 'label' => 'Safety Guides'],
         ];
 
@@ -35,7 +35,7 @@
             ['action' => 'dashboard', 'label' => 'Home'],
             ['action' => 'report-system', 'label' => 'Report'],
             ['action' => 'emergency-dashboard','label' => 'Emergency Dashboard'],
-            ['action' => 'tracking', 'label' => 'Tracking'],
+            ['action' => 'emergency-tracking', 'label' => 'Tracking'],
             ['action' => 'safety-guides', 'label' => 'Safety Guides'],
         ];
 
