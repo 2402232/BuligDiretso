@@ -26,7 +26,14 @@
         </div>
 
         <div class="card">
-            <form id="emergencyForm" action="submit_emergency.php" method="POST" enctype="multipart/form-data">
+            <?php if (!empty($_SESSION['error'])): ?>
+                <div class="report-error" role="alert">
+                    <?php echo htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8'); ?>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+
+            <form id="emergencyForm" action="<?php echo BASE_URL; ?>submit_emergency.php" method="POST" enctype="multipart/form-data">
 
                 <!-- Report fields -->
                 <input type="hidden" name="emergency_type" id="emergency_type" required>
@@ -94,7 +101,7 @@
                     </div>
                 </div>
                 <div class="form-field">
-                    <label for="location_address">Location <span class="optional-tag">(Optional GPS fallback)</span></label>
+                    <label for="location_address">Location <span class="optional-tag">(Required if GPS is unavailable)</span></label>
                     <input type="text" name="address" id="location_address" maxlength="255"
                            placeholder="Enter a nearby address if GPS is unavailable">
                 </div>

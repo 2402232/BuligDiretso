@@ -16,6 +16,12 @@
         </div>
         <?php unset($_SESSION['sms_error']); ?>
     <?php endif; ?>
+    <?php if (!empty($_SESSION['error'])): ?>
+        <div class="sms-flash error" role="alert">
+            <?php echo htmlspecialchars($_SESSION['error']); ?>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
 
     <div class="admin-page-header">
         <div class="admin-page-heading">

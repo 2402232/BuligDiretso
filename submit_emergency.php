@@ -30,16 +30,20 @@ if (!in_array($emergency_type, $allowed_types, true) || !in_array($severity, $al
     exit();
 }
 
-if ($latitude === false || $latitude < -90 || $latitude > 90) {
+if ($latitude === false || $longitude === false
+    || $latitude < -90 || $latitude > 90
+    || $longitude < -180 || $longitude > 180) {
     $latitude = null;
-}
-if ($longitude === false || $longitude < -180 || $longitude > 180) {
     $longitude = null;
 }
 if ($location === '') {
-    $location = ($latitude !== null && $longitude !== null)
-        ? sprintf('GPS coordinates: %.7f, %.7f', $latitude, $longitude)
-        : 'GPS location unavailable';
+    if ($latitude !== null && $longitude !== null) {
+        $location = sprintf('GPS coordinates: %.7f, %.7f', $latitude, $longitude);
+    } else {
+        $_SESSION['error'] = 'Allow location access or enter a nearby address before submitting.';
+        header("Location: " . BASE_URL . "index.php?action=report-system");
+        exit();
+    }
 }
 $location = substr($location, 0, 255);
 

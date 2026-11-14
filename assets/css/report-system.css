@@ -248,6 +248,16 @@ a {
 }
 
 /* ── LOCATION ALERT ── */
+.report-error {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  background: #FEF2F2;
+  color: #991B1B;
+  font-size: 0.9rem;
+}
+
 .location-alert {
   display: flex;
   align-items: flex-start;

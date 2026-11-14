@@ -53,6 +53,12 @@
             </div>
             <span class="map-report-count" id="mapReportCount">Loading locations…</span>
         </div>
+        <?php if (!empty($_SESSION['map_error'])): ?>
+            <p class="map-error" role="alert">
+                <?php echo htmlspecialchars($_SESSION['map_error'], ENT_QUOTES, 'UTF-8'); ?>
+            </p>
+            <?php unset($_SESSION['map_error']); ?>
+        <?php endif; ?>
         <div id="emergencyReportMap" role="application" aria-label="Map of emergency report locations"></div>
         <div class="map-priority-legend" aria-label="Map priority legend">
             <span><i class="map-priority-dot critical"></i>Critical</span>

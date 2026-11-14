@@ -88,6 +88,7 @@ class AdminController  {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             error_log("Error fetching emergencies: " . $e->getMessage());
+            $_SESSION['error'] = 'Unable to load emergency reports. Check the emergency report database setup.';
             return [];
         }
     }
@@ -108,6 +109,7 @@ class AdminController  {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             error_log("Error fetching emergency map reports: " . $e->getMessage());
+            $_SESSION['map_error'] = 'Unable to load GPS locations. Check the emergency report database migration.';
             return [];
         }
     }

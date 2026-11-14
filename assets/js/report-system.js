@@ -250,14 +250,33 @@ emergencyForm.addEventListener('submit', function(e) {
     btn.textContent = 'Getting location…';
 
     function submitWithAvailableLocation() {
-        if (!document.getElementById('location_address').value.trim()) {
-            document.getElementById('location_address').value = 'GPS location unavailable';
+        const addressInput = document.getElementById('location_address');
+        const hasCoordinates = document.getElementById('latitude').value
+            && document.getElementById('longitude').value;
+        if (!hasCoordinates && !addressInput.value.trim()) {
+            locationStatus.textContent = 'GPS is unavailable. Enter a nearby address before submitting.';
+            submittingReport = false;
+            btn.disabled = false;
+            btn.textContent = 'SUBMIT';
+            addressInput.focus();
+            return;
         }
-        const uploadTransfer = new DataTransfer();
-        selectedFiles.forEach(function(file) {
-            uploadTransfer.items.add(file);
-        });
-        fileInput.files = uploadTransfer.files;
+        if (selectedFiles.length > 0) {
+            if (typeof DataTransfer === 'function') {
+                try {
+                    const uploadTransfer = new DataTransfer();
+                    selectedFiles.forEach(function(file) {
+                        uploadTransfer.items.add(file);
+                    });
+                    fileInput.files = uploadTransfer.files;
+                } catch (error) {
+                    console.error('Could not prepare emergency report attachments:', error);
+                    locationStatus.textContent = 'Attachments could not be prepared; submitting the report without them.';
+                }
+            } else {
+                locationStatus.textContent = 'This browser cannot attach files; submitting the report without them.';
+            }
+        }
         emergencyForm.submit();
     }
 
