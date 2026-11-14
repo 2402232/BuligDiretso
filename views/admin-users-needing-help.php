@@ -17,7 +17,7 @@
         <?php unset($_SESSION['sms_error']); ?>
     <?php endif; ?>
 
-    <header class="admin-page-header">
+    <div class="admin-page-header">
         <div class="admin-page-heading">
             <span class="admin-page-icon"><i class="ri-shield-line"></i></span>
             <div>
@@ -29,7 +29,7 @@
             <strong><?php echo count($emergencies); ?></strong>
             <span>total reports</span>
         </div>
-    </header>
+    </div>
 
     <section class="dashboard-card">
         <div class="emergency-toolbar">
@@ -63,7 +63,7 @@
                     $reportCode = (string)($emergency['report_code'] ?? '');
                     ?>
                     <article class="emergency-card" data-severity="<?php echo htmlspecialchars($severity, ENT_QUOTES, 'UTF-8'); ?>" data-status="<?php echo htmlspecialchars($status, ENT_QUOTES, 'UTF-8'); ?>">
-                        <header class="card-header">
+                        <div class="card-header">
                             <div class="emergency-id">
                                 <span class="badge badge-severity badge-<?php echo htmlspecialchars($severity, ENT_QUOTES, 'UTF-8'); ?>">
                                     <?php echo htmlspecialchars(strtoupper($severity)); ?>
@@ -86,7 +86,7 @@
                                     <?php echo htmlspecialchars(date('M j, Y · g:i A', strtotime($emergency['created_at']))); ?>
                                 </time>
                             </div>
-                        </header>
+                        </div>
 
                         <div class="card-body">
                             <div class="info-grid">

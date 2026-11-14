@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?></title>
-    <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/header.css'; ?>">
+    <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/header.css?v=' . filemtime(ROOT_PATH . 'assets/css/header.css'); ?>">
     <link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/home.css'; ?>">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
