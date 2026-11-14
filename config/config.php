@@ -52,7 +52,7 @@ if ($isLocal) {
     define('DB_PASS', '');          // XAMPP default has no password
 } else {
     // --- PRODUCTION (HelioHost cPanel) ---
-    define('DB_HOST', 'morty.heliohost.org');
+    define('DB_HOST', 'johnny.heliohost.org');
     define('DB_NAME', 'izia_buligdiretso');
     define('DB_USER', 'izia_user');
     define('DB_PASS', 'Buligdiretso');
