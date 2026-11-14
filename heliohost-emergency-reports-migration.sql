@@ -63,3 +63,33 @@ ALTER TABLE emergency_reports
         'pending_verification', 'fake', 'pending', 'dispatched', 'responding',
         'en_route', 'on_scene', 'resolved', 'cancelled'
     ) NOT NULL DEFAULT 'pending_verification';
+
+-- The existing HelioHost dump stores reports in the legacy `emergencies` table.
+-- Copy them once; report_code is unique, so re-running this is safe.
+INSERT IGNORE INTO emergency_reports (
+    report_code,
+    user_id,
+    emergency_type,
+    severity,
+    status,
+    description,
+    location,
+    latitude,
+    longitude,
+    created_at,
+    updated_at
+)
+SELECT
+    e.reference_code,
+    e.reporter_id,
+    e.emergency_type,
+    CASE e.priority_level WHEN 'low' THEN 'minor' ELSE e.priority_level END,
+    e.status,
+    e.description,
+    COALESCE(NULLIF(e.location_text, ''), 'Unknown'),
+    e.latitude,
+    e.longitude,
+    e.created_at,
+    e.updated_at
+FROM emergencies e
+INNER JOIN users u ON u.id = e.reporter_id;
