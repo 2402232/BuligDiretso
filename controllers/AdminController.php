@@ -92,6 +92,26 @@ class AdminController  {
         }
     }
 
+    private function getEmergencyMapReports(): array
+    {
+        try {
+            $stmt = db()->query(
+                "SELECT er.report_code, er.emergency_type, er.severity, er.status, er.description,
+                        er.location, er.latitude, er.longitude, er.created_at,
+                        u.first_name, u.last_name
+                 FROM emergency_reports er
+                 JOIN users u ON u.id = er.user_id
+                 WHERE er.latitude IS NOT NULL AND er.longitude IS NOT NULL
+                   AND er.status <> 'fake'
+                 ORDER BY er.created_at DESC"
+            );
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error fetching emergency map reports: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function adminDashboard() {
         $pageTitle = "Admin Dashboard - BuligDiretso";
         // Sample emergency data
@@ -126,7 +146,12 @@ class AdminController  {
     }
 
     public function adminReports() {
+        if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+            redirect('index.php?action=login');
+        }
+
         $pageTitle = "Reports & Analytics - BuligDiretso";
+        $emergencyMapReports = $this->getEmergencyMapReports();
         extract($this->getSharedData());
         require_once VIEW_PATH . 'admin-reports.php';
     }
@@ -288,6 +313,99 @@ class AdminController  {
         } catch (Exception $e) {
             error_log("Verify emergency error: " . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Database error']);
+        }
+        exit();
+    }
+
+    /**
+     * POST params: report_code
+     */
+    public function resolveEmergency(): void
+    {
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit();
+        }
+
+        $reportCode = trim($_POST['report_code'] ?? '');
+        if ($reportCode === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Missing report code']);
+            exit();
+        }
+
+        try {
+            $pdo = db();
+            $stmt = $pdo->prepare(
+                "SELECT er.id, er.report_code, er.emergency_type, er.severity, er.description, er.location,
+                        er.created_at, u.first_name, u.last_name, u.email
+                 FROM emergency_reports er
+                 JOIN users u ON u.id = er.user_id
+                 WHERE er.report_code = ? AND er.status IN ('pending', 'dispatched', 'en_route', 'on_scene')
+                 LIMIT 1"
+            );
+            $stmt->execute([$reportCode]);
+            $report = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$report) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Report not found or already resolved']);
+                exit();
+            }
+
+            $update = $pdo->prepare(
+                "UPDATE emergency_reports SET status = 'resolved', updated_at = NOW()
+                 WHERE id = ? AND status IN ('pending', 'dispatched', 'en_route', 'on_scene')"
+            );
+            $update->execute([(int)$report['id']]);
+            if ($update->rowCount() !== 1) {
+                http_response_code(409);
+                echo json_encode(['success' => false, 'message' => 'Report status changed; refresh and try again']);
+                exit();
+            }
+
+            require_once ROOT_PATH . 'services/SendGridService.php';
+            $reporterName = trim($report['first_name'] . ' ' . $report['last_name']);
+            $resolvedAt = date('Y-m-d H:i:s');
+            $details = $report['description'] ?: 'No additional details provided.';
+            $summary = "Hello {$reporterName},\n\n"
+                . "Your emergency report has been resolved.\n"
+                . "Reference: {$report['report_code']}\nType: {$report['emergency_type']}\n"
+                . "Priority: {$report['severity']}\nLocation: {$report['location']}\n"
+                . "Reported: {$report['created_at']}\nResolved: {$resolvedAt}\n"
+                . "Details: {$details}";
+            $userEmailResult = SendGridService::send(
+                $report['email'],
+                'Emergency report resolved — ' . $report['report_code'],
+                $summary
+            );
+            $adminEmailResult = SendGridService::send(
+                SENDGRID_ADMIN_EMAIL,
+                'Emergency resolution summary — ' . $report['report_code'],
+                "Emergency report resolution summary\n"
+                    . "Reference: {$report['report_code']}\nReporter: {$reporterName}\n"
+                    . "Type: {$report['emergency_type']}\nPriority: {$report['severity']}\n"
+                    . "Location: {$report['location']}\nReported: {$report['created_at']}\n"
+                    . "Resolved: {$resolvedAt}\nDetails: {$details}"
+            );
+
+            $emailStatus = ($userEmailResult['success'] && $adminEmailResult['success'])
+                ? 'Resolution emails sent.'
+                : 'Report resolved, but one or more resolution emails failed. Check server logs.';
+            echo json_encode(['success' => true, 'message' => $emailStatus]);
+        } catch (Exception $e) {
+            error_log('[AdminController] Resolve emergency error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Could not resolve the report']);
         }
         exit();
     }

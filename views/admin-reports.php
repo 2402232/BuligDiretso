@@ -1,5 +1,7 @@
-<link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/admin-reports.css'; ?>">
+<link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/admin-reports.css?v=' . filemtime(ROOT_PATH . 'assets/css/admin-reports.css'); ?>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <?php require_once VIEW_PATH . 'includes/header.php'; ?>
 <div class="admin-wrapper">
@@ -42,6 +44,26 @@
             <div class="stat-change">3 added this month</div>
         </div>
     </div>
+
+    <section class="report-map-section">
+        <div class="report-map-header">
+            <div>
+                <h2><i class="ri-map-pin-line"></i> Emergency Report Map</h2>
+                <p>GPS locations captured from submitted reports. Click a marker for report details.</p>
+            </div>
+            <span class="map-report-count" id="mapReportCount">Loading locations…</span>
+        </div>
+        <div id="emergencyReportMap" role="application" aria-label="Map of emergency report locations"></div>
+        <div class="map-priority-legend" aria-label="Map priority legend">
+            <span><i class="map-priority-dot critical"></i>Critical</span>
+            <span><i class="map-priority-dot high"></i>High</span>
+            <span><i class="map-priority-dot moderate"></i>Moderate</span>
+            <span><i class="map-priority-dot minor"></i>Minor</span>
+        </div>
+        <p class="map-empty-state" id="mapEmptyState" style="display:none;">
+            No reports with GPS coordinates are available yet. Locations will appear here after a reporter submits a report and grants location access.
+        </p>
+    </section>
 
     <!-- Filter Bar -->
     <div class="filter-bar">
@@ -253,6 +275,86 @@
 <script>
 // ── Fetch chart data from database and render ─────────────────
 const BASE_URL = '<?php echo BASE_URL; ?>';
+const emergencyMapReports = <?php
+    echo json_encode(
+        $emergencyMapReports,
+        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE
+    );
+?>;
+
+function initEmergencyMap() {
+    const mapElement = document.getElementById('emergencyReportMap');
+    const countElement = document.getElementById('mapReportCount');
+    const emptyElement = document.getElementById('mapEmptyState');
+    if (!mapElement || typeof L === 'undefined') {
+        countElement.textContent = 'Map service unavailable';
+        return;
+    }
+
+    const map = L.map(mapElement).setView([10.2, 122.98], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const validReports = emergencyMapReports.filter(function(report) {
+        const latitude = Number(report.latitude);
+        const longitude = Number(report.longitude);
+        return Number.isFinite(latitude) && Number.isFinite(longitude)
+            && latitude >= -90 && latitude <= 90
+            && longitude >= -180 && longitude <= 180;
+    });
+
+    countElement.textContent = validReports.length + ' mapped report' + (validReports.length === 1 ? '' : 's');
+    if (validReports.length === 0) {
+        emptyElement.style.display = 'block';
+        return;
+    }
+
+    const markerBounds = [];
+    validReports.forEach(function(report) {
+        const latitude = Number(report.latitude);
+        const longitude = Number(report.longitude);
+        const priority = String(report.severity || '').toLowerCase();
+        const color = {
+            critical: '#DC2626',
+            high: '#EA580C',
+            moderate: '#D97706',
+            minor: '#16A34A'
+        }[priority] || '#2563EB';
+        const marker = L.circleMarker([latitude, longitude], {
+            radius: 8,
+            color: '#ffffff',
+            weight: 2,
+            fillColor: color,
+            fillOpacity: 0.95
+        }).addTo(map);
+
+        const popup = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = report.report_code || 'Emergency report';
+        popup.appendChild(title);
+        [
+            'Reporter: ' + [report.first_name, report.last_name].filter(Boolean).join(' '),
+            'Type: ' + (report.emergency_type || 'Unknown'),
+            'Priority: ' + (report.severity || 'Unknown'),
+            'Status: ' + (report.status || 'Unknown'),
+            'Location: ' + (report.location || 'Not provided'),
+            'Coordinates: ' + latitude.toFixed(7) + ', ' + longitude.toFixed(7),
+            'Reported: ' + (report.created_at || 'Unknown')
+        ].forEach(function(line) {
+            const detail = document.createElement('div');
+            detail.textContent = line;
+            popup.appendChild(detail);
+        });
+        marker.bindPopup(popup);
+        markerBounds.push([latitude, longitude]);
+    });
+
+    map.fitBounds(markerBounds, { padding: [30, 30], maxZoom: 14 });
+}
+
+initEmergencyMap();
 
 function fetchChart(parentKey) {
     return fetch(BASE_URL + 'index.php?action=chart-data-json&chart=' + parentKey)

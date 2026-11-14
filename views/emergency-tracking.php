@@ -3,6 +3,12 @@
 
 <div class="tracking-wrapper">
 
+    <?php if (!empty($_SESSION['success'])): ?>
+        <div class="tracking-card" role="status" style="padding:14px 20px;margin-bottom:16px;">
+            <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
+
     <a class="back-link" href="index.php?action=dashboard">← Back to Home</a>
 
     <div class="tracking-outer">

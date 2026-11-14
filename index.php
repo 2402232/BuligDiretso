@@ -134,6 +134,11 @@ switch ($action) {
         (new AdminController())->verifyEmergency();
         break;
 
+    case 'resolve-emergency':
+        require_once CONTROLLER_PATH . 'AdminController.php';
+        (new AdminController())->resolveEmergency();
+        break;
+
     case 'admin-chart-data':
         require_once CONTROLLER_PATH . 'AdminController.php';
         (new AdminController())->adminChartData();

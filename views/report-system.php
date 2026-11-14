@@ -28,12 +28,11 @@
         <div class="card">
             <form id="emergencyForm" action="submit_emergency.php" method="POST" enctype="multipart/form-data">
 
-                <!-- Hidden fields -->
+                <!-- Report fields -->
                 <input type="hidden" name="emergency_type" id="emergency_type" required>
                 <input type="hidden" name="severity" id="severity" value="moderate" required>
-                <input type="hidden" name="fullname" value="User Name">
-                <input type="hidden" name="contact" value="0000000000">
-                <input type="hidden" name="address" value="Auto-detected location">
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
 
                 <!-- Priority Level -->
                 <p class="priority-label">Priority level</p>
@@ -89,11 +88,16 @@
                 <div class="location-alert">
                     <span class="la-icon">📍</span>
                     <div>
-                        <strong>Location detected: Barangay Bulad, Isabela, Negros Occidental</strong>
-                        <span>Your location is automatically captured</span>
+                        <strong>Browser Geolocation API</strong>
+                        <span id="locationStatus" aria-live="polite">Location is requested when you submit. You can also test it now.</span>
+                        <button type="button" class="location-detect-button" id="detectLocationButton">Detect my location</button>
                     </div>
                 </div>
-                <p class="location-sub">Your location is automatically captured</p>
+                <div class="form-field">
+                    <label for="location_address">Location <span class="optional-tag">(Optional GPS fallback)</span></label>
+                    <input type="text" name="address" id="location_address" maxlength="255"
+                           placeholder="Enter a nearby address if GPS is unavailable">
+                </div>
 
                 <!-- Additional Details -->
                 <div class="form-field">
@@ -139,4 +143,4 @@
 </div>
 
 <?php require_once VIEW_PATH . 'includes/footer.php'; ?>
-<script src="<?php echo ASSETS_PATH . 'js/report-system.js'; ?>"></script>
+<script src="<?php echo ASSETS_PATH . 'js/report-system.js?v=' . filemtime(ROOT_PATH . 'assets/js/report-system.js'); ?>"></script>

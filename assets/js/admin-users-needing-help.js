@@ -24,30 +24,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function filterEmergencies(filterType) {
         emergencyCards.forEach(card => {
-            const badges = card.querySelectorAll('.badge');
-            let shouldShow = false;
-            
+            const severity = card.dataset.severity;
+            const status = card.dataset.status;
+            let shouldShow;
+
             if (filterType === 'All Emergencies') {
                 shouldShow = true;
             } else if (filterType === 'Critical') {
-                badges.forEach(badge => {
-                    if (badge.classList.contains('badge-critical')) {
-                        shouldShow = true;
-                    }
-                });
+                shouldShow = severity === 'critical';
             } else if (filterType === 'Pending Assignment') {
-                badges.forEach(badge => {
-                    if (badge.classList.contains('badge-pending')) {
-                        shouldShow = true;
-                    }
-                });
+                shouldShow = status === 'pending';
             } else if (filterType === 'Responding') {
-                // Check if responder is assigned (not "No responder assigned yet")
-                const responderSection = card.querySelector('.responder-section');
-                const noResponder = responderSection.querySelector('.no-responder');
-                if (!noResponder) {
-                    shouldShow = true;
-                }
+                shouldShow = ['dispatched', 'en_route', 'on_scene'].includes(status);
+            } else {
+                shouldShow = true;
             }
             
             // Show/hide card with animation
@@ -369,6 +359,8 @@ function verifyEmergency(reportCode, action, btn) {
                 statusBadge.className = 'badge badge-pending';
                 statusBadge.textContent = 'PENDING';
             }
+            card.dataset.status = 'pending';
+            actionsDiv.dataset.status = 'pending';
 
             showNotification('Report verified — ready for responder assignment.', 'success');
         } else {
@@ -384,6 +376,8 @@ function verifyEmergency(reportCode, action, btn) {
                 statusBadge.textContent = 'FAKE';
                 statusBadge.style.background = '#6b7280';
             }
+            card.dataset.status = 'fake';
+            actionsDiv.dataset.status = 'fake';
 
             showNotification('Report has been marked as fake.', 'info');
         }
@@ -394,5 +388,42 @@ function verifyEmergency(reportCode, action, btn) {
         if (verifySection) {
             verifySection.querySelectorAll('button').forEach(b => b.disabled = false);
         }
+    });
+}
+
+function resolveEmergency(reportCode, btn) {
+    if (!confirm('Mark emergency ' + reportCode + ' as resolved and notify the reporter and admins?')) return;
+
+    btn.disabled = true;
+    fetch('index.php?action=resolve-emergency', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'report_code=' + encodeURIComponent(reportCode)
+    })
+    .then(function(res) {
+        return res.json().then(function(data) {
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Could not resolve the report.');
+            }
+            return data;
+        });
+    })
+    .then(function(data) {
+        const card = btn.closest('.emergency-card');
+        const statusBadge = card && card.querySelector('.emergency-id .badge:nth-of-type(2)');
+        const actions = btn.closest('.card-actions');
+        if (statusBadge) {
+            statusBadge.className = 'badge badge-resolved';
+            statusBadge.textContent = 'RESOLVED';
+        }
+        if (card) card.dataset.status = 'resolved';
+        if (actions) {
+            actions.innerHTML = '<span class="fake-label" style="color:#16a34a;"><i class="ri-checkbox-circle-line"></i> Emergency resolved</span>';
+        }
+        alert(data.message);
+    })
+    .catch(function(error) {
+        alert(error.message);
+        btn.disabled = false;
     });
 }

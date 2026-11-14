@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/admin-settings.css'; ?>">
+<link rel="stylesheet" href="<?php echo ASSETS_PATH . 'css/admin-settings.css?v=' . filemtime(ROOT_PATH . 'assets/css/admin-settings.css'); ?>">
 
 <?php require_once VIEW_PATH . 'includes/header.php'; ?>
 <div class="admin-wrapper">
@@ -22,6 +22,7 @@
             <button class="settings-tab" data-target="security"><i class="ri-shield-keyhole-line"></i> Security</button>
             <button class="settings-tab" data-target="hotlines"><i class="ri-phone-line"></i> Hotlines</button>
             <button class="settings-tab" data-target="appearance"><i class="ri-palette-line"></i> Appearance</button>
+            <button class="settings-tab" data-target="integrations"><i class="ri-plug-line"></i> Integrations</button>
         </div>
 
         <!-- Settings Panels -->
@@ -189,6 +190,34 @@
                 <button class="save-btn"><i class="ri-save-line"></i> Save Changes</button>
             </div>
 
+            <!-- Integrations -->
+            <div class="settings-panel" id="integrations">
+                <h3 class="panel-title">API Integrations</h3>
+                <div class="integration-card">
+                    <div class="integration-card-icon"><i class="ri-map-pin-line"></i></div>
+                    <div class="integration-card-content">
+                        <div class="integration-card-heading">
+                            <h4>Browser Geolocation API</h4>
+                            <span class="integration-status" id="geolocationApiStatus">Checking browser support…</span>
+                        </div>
+                        <p>Captures report coordinates when the reporter grants browser location permission. Available on HTTPS or localhost.</p>
+                    </div>
+                </div>
+                <?php $sendGridConfigured = SENDGRID_API_KEY !== '' && SENDGRID_FROM_EMAIL !== ''; ?>
+                <div class="integration-card">
+                    <div class="integration-card-icon"><i class="ri-mail-send-line"></i></div>
+                    <div class="integration-card-content">
+                        <div class="integration-card-heading">
+                            <h4>SendGrid API</h4>
+                            <span class="integration-status <?php echo $sendGridConfigured ? 'configured' : 'not-configured'; ?>">
+                                <?php echo $sendGridConfigured ? 'Configured' : 'Needs configuration'; ?>
+                            </span>
+                        </div>
+                        <p>Sends report confirmations, responder assignment updates, and resolution summaries to users and admins. API credentials are not displayed here.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -202,6 +231,14 @@ document.querySelectorAll('.settings-tab').forEach(tab => {
         document.getElementById(tab.dataset.target).classList.add('active');
     });
 });
+</script>
+<script>
+const geolocationStatus = document.getElementById('geolocationApiStatus');
+if (geolocationStatus) {
+    geolocationStatus.textContent = !window.isSecureContext
+        ? 'Requires HTTPS or localhost'
+        : ('geolocation' in navigator ? 'Available in this browser' : 'Not supported by this browser');
+}
 </script>
 
 <?php require_once VIEW_PATH . 'includes/footer.php'; ?>

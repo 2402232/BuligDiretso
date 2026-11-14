@@ -3,7 +3,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-header {
+body > header {
     background: #12375A;
     position: fixed;
     top: 0;

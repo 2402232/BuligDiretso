@@ -54,4 +54,15 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 .upload-area i { font-size: 28px; color: #BDC3C7; }
 .upload-area:hover { border-color: #1A3A52; }
 
+/* API integrations */
+.integration-card { display: flex; gap: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid #E0E0E0; border-radius: 9px; background: #FAFAFA; }
+.integration-card-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 8px; background: #EAF1F5; color: #1A3A52; font-size: 20px; }
+.integration-card-content { flex: 1; }
+.integration-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.integration-card-heading h4 { margin: 0; color: #2C3E50; font-size: 14px; }
+.integration-card-content p { margin: 7px 0 0; color: #7F8C8D; font-size: 12px; line-height: 1.5; }
+.integration-status { border-radius: 999px; padding: 4px 9px; background: #FEF3C7; color: #92400E; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.integration-status.configured { background: #DCFCE7; color: #166534; }
+.integration-status.not-configured { background: #FEE2E2; color: #991B1B; }
+
 @media (max-width: 768px) { .settings-layout { grid-template-columns: 1fr; } .settings-sidebar { flex-direction: row; flex-wrap: wrap; } }

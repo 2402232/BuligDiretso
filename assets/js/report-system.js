@@ -186,9 +186,57 @@ function escapeHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Form submit ───────────────────────────────────────────────
-document.getElementById('emergencyForm').addEventListener('submit', function(e) {
+// ── Capture browser location and submit the report ────────────
+const emergencyForm = document.getElementById('emergencyForm');
+const locationStatus = document.getElementById('locationStatus');
+const detectLocationButton = document.getElementById('detectLocationButton');
+let submittingReport = false;
+
+function captureLocation(onComplete) {
+    if (!navigator.geolocation) {
+        locationStatus.textContent = 'Geolocation is not supported by this browser.';
+        onComplete(false);
+        return;
+    }
+
+    locationStatus.textContent = 'Requesting location permission…';
+    navigator.geolocation.getCurrentPosition(function(position) {
+        const latitude = position.coords.latitude.toFixed(7);
+        const longitude = position.coords.longitude.toFixed(7);
+        document.getElementById('latitude').value = latitude;
+        document.getElementById('longitude').value = longitude;
+
+        if (!document.getElementById('location_address').value.trim()) {
+            document.getElementById('location_address').value = 'GPS coordinates: ' + latitude + ', ' + longitude;
+        }
+        locationStatus.textContent = 'Location captured: ' + latitude + ', ' + longitude;
+        onComplete(true);
+    }, function(error) {
+        const reasons = {
+            1: 'Location permission was denied.',
+            2: 'Your location could not be determined.',
+            3: 'Location request timed out.'
+        };
+        locationStatus.textContent = (reasons[error.code] || 'GPS location is unavailable.')
+            + ' Enter a nearby address if needed.';
+        onComplete(false);
+    }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+    });
+}
+
+detectLocationButton.addEventListener('click', function() {
+    detectLocationButton.disabled = true;
+    captureLocation(function() {
+        detectLocationButton.disabled = false;
+    });
+});
+
+emergencyForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    if (submittingReport) return;
 
     const type = document.getElementById('emergency_type').value;
     if (!type) {
@@ -196,33 +244,30 @@ document.getElementById('emergencyForm').addEventListener('submit', function(e) 
         return;
     }
 
-    const details  = document.querySelector('textarea[name="additional_details"]')?.value || '';
-    const location = document.querySelector('.location-alert strong')?.textContent?.replace('Location detected: ', '')
-                     || 'Barangay Bulad, Isabela, Negros Occidental';
-
-    // Build report object (files noted by count for localStorage demo)
-    const report = {
-        id:           'ER-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-        type:         type,
-        details:      details,
-        location:     location,
-        timestamp:    new Date().toISOString(),
-        status:       'dispatched',
-        responderIdx: Math.floor(Math.random() * 5),
-        attachments:  selectedFiles.length,
-    };
-
-    let reports = [];
-    try { reports = JSON.parse(localStorage.getItem('bd_reports') || '[]'); } catch(err) { reports = []; }
-    reports.unshift(report);
-    localStorage.setItem('bd_reports', JSON.stringify(reports));
-
     const btn = document.getElementById('submitBtn');
-    btn.textContent = '✓ Report Submitted! Redirecting…';
-    btn.style.background = '#22C55E';
+    submittingReport = true;
     btn.disabled = true;
+    btn.textContent = 'Getting location…';
 
-    setTimeout(function() {
-        window.location.href = 'index.php?action=emergency-tracking';
-    }, 1200);
+    function submitWithAvailableLocation() {
+        if (!document.getElementById('location_address').value.trim()) {
+            document.getElementById('location_address').value = 'GPS location unavailable';
+        }
+        const uploadTransfer = new DataTransfer();
+        selectedFiles.forEach(function(file) {
+            uploadTransfer.items.add(file);
+        });
+        fileInput.files = uploadTransfer.files;
+        emergencyForm.submit();
+    }
+
+    function finishSubmission() {
+        submitWithAvailableLocation();
+    }
+
+    if (document.getElementById('latitude').value && document.getElementById('longitude').value) {
+        finishSubmission();
+    } else {
+        captureLocation(finishSubmission);
+    }
 });

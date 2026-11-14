@@ -3,6 +3,7 @@
 
 // SmsService is already loaded by config.php, but require_once is safe to repeat
 require_once ROOT_PATH . 'services/SmsService.php';
+require_once ROOT_PATH . 'services/SendGridService.php';
 
 class SmsController
 {
@@ -31,8 +32,46 @@ class SmsController
         $sendFollowup   = !empty($_POST['send_followup']);
         $followupMsg    = trim($_POST['followup_message'] ?? '');
 
-        if ($emergencyId === '' || $userPhone === '' || $userName === '' || $location === '' || $responderName === '') {
+        if ($emergencyId === '' || $responderName === '') {
             $_SESSION['sms_error'] = 'Missing required assignment details.';
+            $this->back();
+            return;
+        }
+
+        try {
+            $pdo = db();
+            $reportStmt = $pdo->prepare(
+                "SELECT er.id, er.report_code, er.emergency_type, er.severity, er.status, er.description, er.location,
+                        u.first_name, u.last_name, u.email, u.phone
+                 FROM emergency_reports er
+                 JOIN users u ON u.id = er.user_id
+                 WHERE er.report_code = ?
+                 LIMIT 1"
+            );
+            $reportStmt->execute([$emergencyId]);
+            $report = $reportStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$report || !in_array($report['status'], ['pending', 'pending_verification', 'dispatched'], true)) {
+                $_SESSION['sms_error'] = 'This report could not be found or is no longer available for assignment.';
+                $this->back();
+                return;
+            }
+
+            $userName = trim($report['first_name'] . ' ' . $report['last_name']);
+            $userPhone = $report['phone'];
+            $userEmail = $report['email'];
+            $location = $report['location'];
+            $emergencyType = $report['emergency_type'] . ' emergency';
+
+            $updateStmt = $pdo->prepare(
+                "UPDATE emergency_reports
+                 SET status = 'dispatched', updated_at = NOW()
+                 WHERE id = ? AND status IN ('pending', 'pending_verification', 'dispatched')"
+            );
+            $updateStmt->execute([(int)$report['id']]);
+        } catch (Exception $e) {
+            error_log('[SmsController] Assignment database error: ' . $e->getMessage());
+            $_SESSION['sms_error'] = 'The responder could not be assigned because the report could not be updated.';
             $this->back();
             return;
         }
@@ -67,6 +106,22 @@ class SmsController
             SmsService::send(SmsService::formatPhone($userPhone), $followupMsg);
         }
 
+        $assignmentEmail = "Hello {$userName},\n\n"
+            . "A responder has been assigned to your emergency report.\n"
+            . "Reference: {$emergencyId}\nType: {$emergencyType}\nResponder: {$responderName}\n"
+            . "Estimated arrival: {$eta}\nLocation: {$location}\n\nPlease keep your phone available.";
+        $userEmailResult = SendGridService::send(
+            $userEmail,
+            'Responder assigned — ' . $emergencyId,
+            $assignmentEmail
+        );
+        $adminEmailResult = SendGridService::send(
+            SENDGRID_ADMIN_EMAIL,
+            'Responder assigned — ' . $emergencyId,
+            "Responder {$responderName} was assigned to report {$emergencyId}.\n"
+                . "Reporter: {$userName}\nType: {$emergencyType}\nLocation: {$location}\nETA: {$eta}"
+        );
+
         // Build feedback message — assignment succeeds regardless of SMS outcome
         $msg = "Responder {$responderName} assigned successfully for case #{$emergencyId}.";
         $msg .= $userResult['success']
@@ -75,6 +130,12 @@ class SmsController
         $msg .= $responderResult['success']
             ? ' Responder SMS sent.'
             : " Responder SMS failed: {$responderResult['message']}.";
+        $msg .= $userEmailResult['success']
+            ? ' User email sent.'
+            : " User email failed: {$userEmailResult['message']}.";
+        $msg .= $adminEmailResult['success']
+            ? ' Admin email sent.'
+            : " Admin email failed: {$adminEmailResult['message']}.";
 
         $_SESSION['sms_success'] = $msg;
         $this->back();
