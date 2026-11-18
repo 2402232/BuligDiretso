@@ -36,6 +36,15 @@
                 </div>
             <?php endif; ?>
 
+            <form action="<?php echo BASE_URL; ?>index.php?action=resend_verification" method="POST">
+                <label for="verification-email">Need a verification link?</label>
+                <div class="input-group">
+                    <span class="icon">✉️</span>
+                    <input id="verification-email" type="email" name="email" placeholder="Email address" required>
+                </div>
+                <button type="submit" class="login-btn">Resend Verification Email</button>
+            </form>
+
             <!-- FORM -->
             <form action="<?php echo BASE_URL; ?>index.php?action=process_login" method="POST">
                 <label>Email Address<span>*</span></label>

@@ -1,6 +1,7 @@
 <?php
 require_once 'HomeController.php';
 require_once MODEL_PATH . 'user.php';
+require_once ROOT_PATH . 'services/GmailService.php';
 
 class AuthController extends HomeController {
     private const REMEMBER_COOKIE = 'bd_remember';
@@ -15,6 +16,15 @@ class AuthController extends HomeController {
         $_SESSION['user_name'] = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['user_role'] = $user['role'] ?? 'pwd';
+    }
+
+    private function createEmailVerificationToken(int $userId): string {
+        $token = bin2hex(random_bytes(32));
+        User::saveEmailVerificationToken(
+            $userId,
+            hash('sha256', $token)
+        );
+        return $token;
     }
 
     private function createRememberCookie(int $userId): void {
@@ -246,43 +256,25 @@ class AuthController extends HomeController {
             'password_hash' => $password_hash,
         ];
 
+        $pdo = db();
         try {
+            $pdo->beginTransaction();
             $userId = User::create($data);
             if (!$userId) {
-                $_SESSION['signup_errors'] = ["Registration failed. Please try again."];
-                $_SESSION['signup_old'] = [
-                    'first_name' => $fname,
-                    'last_name'  => $lname,
-                    'email'      => $email,
-                    'phone'      => $phone,
-                    'dob'        => $dob,
-                    'address'    => $address,
-                    'role'       => $role,
-                ];
-                header("Location: " . BASE_URL . "index.php?action=signup");
-                exit();
+                throw new RuntimeException('User creation did not return an ID.');
             }
 
             if ($role === 'responder') {
-                $pdo = db();
                 $pdo->prepare("INSERT INTO responders (user_id) VALUES (?)")->execute([$userId]);
             }
 
-            // ── Send welcome SMS ──────────────────────────────────────
-            if (!empty($phone)) {
-                SmsService::send(
-                    SmsService::formatPhone($phone),
-                    "Welcome to BuligDiretso, {$fname}! Your account has been created. " .
-                    "You can now log in and request emergency assistance."
-                );
-            }
-            // ─────────────────────────────────────────────────────────
-
-            $_SESSION['success'] = "Account created successfully! Please log in.";
-            header("Location: " . BASE_URL . "index.php?action=login");
-            exit();
+            $verificationToken = $this->createEmailVerificationToken((int)$userId);
+            $pdo->commit();
         } catch (Throwable $e) {
-            error_log("Signup error: " . $e->getMessage());
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log("Signup database error: " . $e->getMessage());
             $msg = "Registration failed. Please try again later.";
             if (defined('IS_LOCAL') && IS_LOCAL) {
                 $msg .= " [Debug: " . htmlspecialchars($e->getMessage()) . "]";
@@ -300,6 +292,108 @@ class AuthController extends HomeController {
             header("Location: " . BASE_URL . "index.php?action=signup");
             exit();
         }
+
+        $emailSent = true;
+        try {
+            GmailService::sendSignupVerification($email, $fname, $verificationToken);
+        } catch (Throwable $e) {
+            $emailSent = false;
+            error_log("Signup verification email error: " . $e->getMessage());
+        }
+
+        try {
+            if (!empty($phone)) {
+                SmsService::send(
+                    SmsService::formatPhone($phone),
+                    "Welcome to BuligDiretso, {$fname}! Please verify your email address before logging in."
+                );
+            }
+        } catch (Throwable $e) {
+            error_log("Signup welcome SMS error: " . $e->getMessage());
+        }
+
+        if ($emailSent) {
+            $_SESSION['success'] = "Account created. Check your email for a verification link before logging in.";
+        } else {
+            $_SESSION['error'] = "Your account was created, but we could not send the verification email. Use the resend option below.";
+        }
+        header("Location: " . BASE_URL . "index.php?action=login");
+        exit();
+    }
+
+    public function verifyEmail() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $token = (string)($_GET['token'] ?? '');
+            if (!preg_match('/^[a-f0-9]{64}$/', $token)) {
+                $_SESSION['error'] = "That verification link is invalid or has expired.";
+                header("Location: " . BASE_URL . "index.php?action=login");
+                exit();
+            }
+
+            header('Referrer-Policy: no-referrer');
+            $pageTitle = "Verify Email - BuligDiretso";
+            $verificationToken = $token;
+            extract($this->getSharedData());
+            require_once VIEW_PATH . 'verify-email.php';
+            return;
+        }
+
+        $token = (string)($_POST['token'] ?? '');
+        if (!preg_match('/^[a-f0-9]{64}$/', $token)) {
+            $_SESSION['error'] = "That verification link is invalid or has expired.";
+            header("Location: " . BASE_URL . "index.php?action=login");
+            exit();
+        }
+
+        try {
+            if (User::verifyEmailToken(hash('sha256', $token))) {
+                $_SESSION['success'] = "Email verified. You can now log in.";
+            } else {
+                $_SESSION['error'] = "That verification link is invalid or has expired.";
+            }
+        } catch (Throwable $e) {
+            error_log("Email verification error: " . $e->getMessage());
+            $_SESSION['error'] = "We could not verify your email right now. Please try again.";
+        }
+
+        header("Location: " . BASE_URL . "index.php?action=login");
+        exit();
+    }
+
+    public function resendVerification() {
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            header("Location: " . BASE_URL . "index.php?action=login");
+            exit();
+        }
+
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['error'] = "Enter a valid email address to request a verification link.";
+            header("Location: " . BASE_URL . "index.php?action=login");
+            exit();
+        }
+
+        try {
+            $user = User::findUnverifiedByEmail($email);
+            if ($user) {
+                $lastSent = !empty($user['token_created_at'])
+                    ? strtotime($user['token_created_at'])
+                    : false;
+
+                if ($lastSent === false || $lastSent <= time() - 60) {
+                    $token = $this->createEmailVerificationToken((int)$user['id']);
+                    GmailService::sendSignupVerification($email, (string)$user['first_name'], $token);
+                }
+            }
+
+            $_SESSION['success'] = "If an unverified account matches that email, a verification link will be sent. Please wait a minute before requesting another.";
+        } catch (Throwable $e) {
+            error_log("Resend verification email error: " . $e->getMessage());
+            $_SESSION['error'] = "We could not send a verification email right now. Please try again later.";
+        }
+
+        header("Location: " . BASE_URL . "index.php?action=login");
+        exit();
     }
 
     /**

@@ -26,11 +26,26 @@ CREATE TABLE users (
     password_hash   VARCHAR(255)    NOT NULL,
     profile_photo   VARCHAR(255)    DEFAULT NULL,
     is_active       TINYINT(1)      NOT NULL DEFAULT 1,
+    email_verified_at DATETIME      DEFAULT NULL,
     created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE email_verification_tokens (
+    user_id         INT UNSIGNED    NOT NULL,
+    token_hash      CHAR(64)        NOT NULL,
+    expires_at      DATETIME        NOT NULL,
+    created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id),
+    UNIQUE KEY uq_email_verification_token_hash (token_hash),
+    KEY idx_email_verification_expires_at (expires_at),
+    CONSTRAINT fk_email_verification_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -96,6 +111,41 @@ CREATE TABLE emergencies (
     KEY idx_emergencies_priority   (priority_level),
     CONSTRAINT fk_emergencies_reporter
         FOREIGN KEY (reporter_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Reports used by the current submit_emergency.php and AdminController.
+-- Keep this separate from the legacy emergencies table used for assignments.
+CREATE TABLE emergency_reports (
+    id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    report_code     VARCHAR(20)     NOT NULL,
+    user_id         INT UNSIGNED    NOT NULL,
+    emergency_type  VARCHAR(50)     NOT NULL,
+    severity        ENUM('minor','low','moderate','high','critical') NOT NULL DEFAULT 'moderate',
+    status          ENUM(
+                        'pending_verification',
+                        'fake',
+                        'pending',
+                        'dispatched',
+                        'responding',
+                        'en_route',
+                        'on_scene',
+                        'resolved',
+                        'cancelled'
+                    )               NOT NULL DEFAULT 'pending_verification',
+    description     TEXT            DEFAULT NULL,
+    location        VARCHAR(255)    NOT NULL DEFAULT 'Unknown',
+    latitude        DECIMAL(10,7)   DEFAULT NULL,
+    longitude       DECIMAL(10,7)   DEFAULT NULL,
+    created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_emergency_reports_code (report_code),
+    KEY idx_emergency_reports_user (user_id),
+    KEY idx_emergency_reports_status (status),
+    CONSTRAINT fk_emergency_reports_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -226,6 +276,10 @@ INSERT INTO users (id, first_name, last_name, email, phone, date_of_birth, addre
 (8,  'Jeon',     'Jungkook', 'jeon.jungkook@email.com','09551234567', '1997-09-01', 'Brgy. Quintin Remo, Isabela, Neg.',  'responder', '$2y$12$QpLvLMz6Nk8r2jT5qXbB7.HZ4cXkFDp5G3sOT7MkiK6Dm9Z3REqsO'),
 (9,  'Carlos',   'Mendoza',  'carlos.mendoza@email.com','09661112233','1992-04-30', '123 Main St, Isabela, Negros Occ.',  'pwd',       '$2y$12$ByTGxHSl4E9R7kV2Yv5eCeEW7zDdp0i4yCaWPsUmFqLg5HUOkB.iW');
 
+UPDATE users
+SET email_verified_at = CURRENT_TIMESTAMP
+WHERE email_verified_at IS NULL;
+
 -- ------------------------------------------------------------
 -- Responders (one row per responder user)
 -- ------------------------------------------------------------
@@ -253,6 +307,24 @@ VALUES
      10.2080, 122.9800, 'Brgy. Cabcab, Isabela, Negros Occ.', 'resolved',   '2024-02-08 13:10:00', '2024-02-08 14:00:00'),
 (5,  'ER-E5PQ', 9, 'disaster', 'high',     'Flash flood threatening residential area.',
      10.2100, 122.9830, 'Brgy. Quintin Remo, Isabela, Neg.', 'pending',    '2024-02-08 14:00:00', NULL);
+
+-- Mirror legacy sample emergencies in the report table used by the application.
+INSERT INTO emergency_reports
+    (report_code, user_id, emergency_type, severity, status, description, location,
+     latitude, longitude, created_at, updated_at)
+SELECT
+    reference_code,
+    reporter_id,
+    emergency_type,
+    priority_level,
+    status,
+    description,
+    location_text,
+    latitude,
+    longitude,
+    created_at,
+    updated_at
+FROM emergencies;
 
 -- ------------------------------------------------------------
 -- Emergency Assignments

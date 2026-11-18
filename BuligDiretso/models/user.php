@@ -16,10 +16,80 @@ class User {
      */
     public static function findByEmail(string $email): ?array {
         $pdo = db();
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE LOWER(email) = LOWER(?) AND is_active = 1 LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1");
         $stmt->execute([trim($email)]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
+    }
+
+    /**
+     * Find an active, unverified account and its current verification token timestamp.
+     * @return array|null
+     */
+    public static function findUnverifiedByEmail(string $email): ?array {
+        $pdo = db();
+        $stmt = $pdo->prepare(
+            "SELECT u.id, u.first_name, t.created_at AS token_created_at
+             FROM users u
+             LEFT JOIN email_verification_tokens t ON t.user_id = u.id
+             WHERE LOWER(u.email) = LOWER(?) AND u.is_active = 1
+               AND u.email_verified_at IS NULL
+             LIMIT 1"
+        );
+        $stmt->execute([trim($email)]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public static function saveEmailVerificationToken(int $userId, string $tokenHash): void {
+        $pdo = db();
+        $stmt = $pdo->prepare(
+            "INSERT INTO email_verification_tokens (user_id, token_hash, expires_at)
+             VALUES (?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY))
+             ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash),
+                                     expires_at = DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY),
+                                     created_at = CURRENT_TIMESTAMP"
+        );
+        $stmt->execute([$userId, $tokenHash]);
+    }
+
+    public static function verifyEmailToken(string $tokenHash): bool {
+        $pdo = db();
+        $pdo->beginTransaction();
+
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT user_id
+                 FROM email_verification_tokens
+                 WHERE token_hash = ? AND expires_at > CURRENT_TIMESTAMP
+                 LIMIT 1
+                 FOR UPDATE"
+            );
+            $stmt->execute([$tokenHash]);
+            $userId = $stmt->fetchColumn();
+
+            if ($userId === false) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $stmt = $pdo->prepare(
+                "UPDATE users
+                 SET email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)
+                 WHERE id = ?"
+            );
+            $stmt->execute([(int)$userId]);
+
+            $stmt = $pdo->prepare("DELETE FROM email_verification_tokens WHERE user_id = ?");
+            $stmt->execute([(int)$userId]);
+            $pdo->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -65,7 +135,7 @@ class User {
     public static function verifyLogin(string $email, string $password): ?array {
         try {
             $user = self::findByEmail($email);
-            if (!$user) {
+            if (!$user || empty($user['is_active']) || empty($user['email_verified_at'])) {
                 return null;
             }
 

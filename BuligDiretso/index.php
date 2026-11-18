@@ -36,6 +36,16 @@ switch ($action) {
         $controller->processSignup();
         break;
 
+    case 'verify_email':
+        require_once CONTROLLER_PATH . 'AuthController.php';
+        (new AuthController())->verifyEmail();
+        break;
+
+    case 'resend_verification':
+        require_once CONTROLLER_PATH . 'AuthController.php';
+        (new AuthController())->resendVerification();
+        break;
+
     case 'logout':
         require_once CONTROLLER_PATH . 'AuthController.php';
         $controller = new AuthController();
