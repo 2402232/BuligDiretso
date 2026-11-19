@@ -287,6 +287,7 @@ const emergencyMapReports = <?php
         JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE
     );
 ?>;
+const geoapifyApiKey = <?php echo json_encode(getenv('GEOAPIFY_API_KEY') ?: '', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
 
 function initEmergencyMap() {
     const mapElement = document.getElementById('emergencyReportMap');
@@ -297,10 +298,15 @@ function initEmergencyMap() {
         return;
     }
 
+    if (!geoapifyApiKey) {
+        countElement.textContent = 'Map service is not configured';
+        return;
+    }
+
     const map = L.map(mapElement).setView([10.2, 122.98], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=' + encodeURIComponent(geoapifyApiKey), {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> &copy; <a href="https://www.geoapify.com/">Geoapify</a>'
     }).addTo(map);
 
     const validReports = emergencyMapReports.filter(function(report) {
