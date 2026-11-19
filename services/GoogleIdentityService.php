@@ -21,7 +21,6 @@ class GoogleIdentityService {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_TIMEOUT => 20,
-            CURLOPT_CAINFO => 'C:\xampp\apache\bin\curl-ca-bundle.crt',
         ]);
         $body = curl_exec($handle);
         $curlError = curl_error($handle);
