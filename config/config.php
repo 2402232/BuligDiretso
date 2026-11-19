@@ -67,6 +67,10 @@ define('SESSION_TIMEOUT', 3600);      // 1 hour in seconds
 define('CSRF_TOKEN_EXPIRE', 1800);    // 30 minutes in seconds
 define('ADMIN_EMAIL', 'admin@buligdiretso.com');
 define(
+    'GEOAPIFY_API_KEY',
+    getenv('GEOAPIFY_API_KEY') ?: '811b9c1c16ef491f98f38e12ccf18438'
+);
+define(
     'GOOGLE_CLIENT_ID',
     getenv('GOOGLE_CLIENT_ID') ?: '965007272029-2j337lvkto426qn4aba77lv7is8t5od2.apps.googleusercontent.com'
 );

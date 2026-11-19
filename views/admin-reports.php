@@ -287,7 +287,7 @@ const emergencyMapReports = <?php
         JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE
     );
 ?>;
-const geoapifyApiKey = <?php echo json_encode(getenv('GEOAPIFY_API_KEY') ?: '', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
+const geoapifyApiKey = <?php echo json_encode(defined('GEOAPIFY_API_KEY') ? GEOAPIFY_API_KEY : (getenv('GEOAPIFY_API_KEY') ?: ''), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
 
 function initEmergencyMap() {
     const mapElement = document.getElementById('emergencyReportMap');
