@@ -68,7 +68,7 @@ define('CSRF_TOKEN_EXPIRE', 1800);    // 30 minutes in seconds
 define('ADMIN_EMAIL', 'admin@buligdiretso.com');
 define(
     'GOOGLE_CLIENT_ID',
-    getenv('GOOGLE_CLIENT_ID') ?: '965007272029-k0hk3k381mnhchni51etdsk86rige73s.apps.googleusercontent.com'
+    getenv('GOOGLE_CLIENT_ID') ?: '965007272029-2j337lvkto426qn4aba77lv7is8t5od2.apps.googleusercontent.com'
 );
 // Configure these as server environment variables; keep API keys out of source control.
 define('SENDGRID_API_KEY', getenv('SENDGRID_API_KEY') ?: '');
