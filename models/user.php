@@ -9,6 +9,59 @@ if (!function_exists('db')) {
 }
 
 class User {
+    public static function findByGoogleSubject(string $subject): ?array {
+        $pdo = db();
+        $dobColumn = self::getDobColumn();
+        $stmt = $pdo->prepare("SELECT *, {$dobColumn} AS date_of_birth FROM users WHERE google_subject = ? AND is_active = 1 LIMIT 1");
+        $stmt->execute([$subject]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public static function linkGoogleSubject(int $userId, string $subject): void {
+        $pdo = db();
+        $stmt = $pdo->prepare(
+            "UPDATE users SET google_subject = ?, email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP) WHERE id = ?"
+        );
+        $stmt->execute([$subject, $userId]);
+    }
+
+    public static function createGoogleAccount(array $identity): array {
+        $email = strtolower(trim((string)($identity['email'] ?? '')));
+        $subject = trim((string)($identity['subject'] ?? ''));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $subject === '') {
+            throw new InvalidArgumentException('A verified Google identity is required.');
+        }
+
+        $firstName = trim((string)($identity['first_name'] ?? ''));
+        $lastName = trim((string)($identity['last_name'] ?? ''));
+        if ($firstName === '') {
+            $firstName = strstr($email, '@', true) ?: 'Google';
+        }
+
+        $pdo = db();
+        $dobColumn = self::getDobColumn();
+        $passwordHash = password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare(
+            "INSERT INTO users
+                (first_name, last_name, email, phone, {$dobColumn}, address, role, password_hash,
+                 google_subject, email_verified_at)
+             VALUES (?, ?, ?, '', NULL, '', 'users', ?, ?, CURRENT_TIMESTAMP)"
+        );
+        $stmt->execute([
+            substr($firstName, 0, 80),
+            substr($lastName, 0, 80),
+            $email,
+            $passwordHash,
+            $subject,
+        ]);
+
+        $user = self::findById((int)$pdo->lastInsertId());
+        if (!$user) {
+            throw new RuntimeException('Google account was created but could not be loaded.');
+        }
+        return $user;
+    }
     /**
      * Resolve DOB column name for mixed schemas.
      */

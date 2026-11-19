@@ -36,6 +36,15 @@
                 </div>
             <?php endif; ?>
 
+            <?php $googleClientId = defined('GOOGLE_CLIENT_ID') ? GOOGLE_CLIENT_ID : getenv('GOOGLE_CLIENT_ID'); ?>
+            <?php if ($googleClientId): ?>
+                <div id="google-signin-button"></div>
+                <form id="google-signin-form" action="<?php echo BASE_URL; ?>index.php?action=google_signin" method="POST" style="display:none;">
+                    <input type="hidden" name="credential" id="google-credential">
+                </form>
+                <div class="divider"></div>
+            <?php endif; ?>
+
             <!-- FORM -->
             <form action="<?php echo BASE_URL; ?>index.php?action=process_login" method="POST">
                 <label>Email Address<span>*</span></label>
@@ -81,6 +90,25 @@
     </div>
 </div>
 <?php include 'views/includes/footer.php'; ?>
+
+<?php if ($googleClientId): ?>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+window.onload = function () {
+    google.accounts.id.initialize({
+        client_id: <?php echo json_encode($googleClientId, JSON_HEX_TAG | JSON_HEX_AMP); ?>,
+        callback: function (response) {
+            document.getElementById('google-credential').value = response.credential;
+            document.getElementById('google-signin-form').submit();
+        }
+    });
+    google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        { theme: 'outline', size: 'large', text: 'continue_with', width: 680 }
+    );
+};
+</script>
+<?php endif; ?>
 
 </body>
 

@@ -10,6 +10,28 @@ if (!function_exists('db')) {
 
 class User {
 
+    public static function findByGoogleSubject(string $subject): ?array {
+        $pdo = db();
+        $stmt = $pdo->prepare(
+            "SELECT * FROM users
+             WHERE google_subject = ? AND is_active = 1
+             LIMIT 1"
+        );
+        $stmt->execute([$subject]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public static function linkGoogleSubject(int $userId, string $subject): void {
+        $pdo = db();
+        $stmt = $pdo->prepare(
+            "UPDATE users
+             SET google_subject = ?, email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)
+             WHERE id = ?"
+        );
+        $stmt->execute([$subject, $userId]);
+    }
+
     /**
      * Find a user by email (case-insensitive).
      * @return array|null User row or null

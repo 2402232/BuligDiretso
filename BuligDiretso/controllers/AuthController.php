@@ -2,6 +2,7 @@
 require_once 'HomeController.php';
 require_once MODEL_PATH . 'user.php';
 require_once ROOT_PATH . 'services/GmailService.php';
+require_once ROOT_PATH . 'services/GoogleIdentityService.php';
 
 class AuthController extends HomeController {
     private const REMEMBER_COOKIE = 'bd_remember';
@@ -119,6 +120,54 @@ class AuthController extends HomeController {
         extract($this->getSharedData());
 
         require_once VIEW_PATH . 'signup.php';
+    }
+
+    public function processGoogleSignIn() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: " . BASE_URL . "index.php?action=login");
+            exit();
+        }
+
+        $credential = (string)($_POST['credential'] ?? '');
+        if ($credential === '') {
+            $_SESSION['error'] = "Google Sign-In did not return a valid credential.";
+            header("Location: " . BASE_URL . "index.php?action=login");
+            exit();
+        }
+
+        try {
+            $google = GoogleIdentityService::verifyIdToken($credential);
+            $user = User::findByGoogleSubject($google['subject']);
+
+            if (!$user) {
+                $user = User::findByEmail($google['email']);
+                if ($user) {
+                    if (empty($user['email_verified_at'])) {
+                        throw new RuntimeException('Verify this email through BuligDiretso before using Google Sign-In.');
+                    }
+                    User::linkGoogleSubject((int)$user['id'], $google['subject']);
+                }
+            }
+
+            if (!$user) {
+                throw new RuntimeException('No BuligDiretso account exists for this Google email. Please sign up first.');
+            }
+
+            $this->setUserSession($user);
+            self::clearRememberCookie();
+            $_SESSION['success'] = "Login successful!";
+
+            $target = (($user['role'] ?? 'pwd') === 'admin')
+                ? 'admin-dashboard'
+                : 'dashboard';
+            header("Location: " . BASE_URL . "index.php?action=" . $target);
+            exit();
+        } catch (Throwable $e) {
+            error_log("Google Sign-In error: " . $e->getMessage());
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: " . BASE_URL . "index.php?action=login");
+            exit();
+        }
     }
 
     /**

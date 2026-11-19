@@ -36,6 +36,12 @@ switch ($action) {
         $controller->processSignup();
         break;
 
+    case 'google_signin':
+        require_once CONTROLLER_PATH . 'AuthController.php';
+        $controller = new AuthController();
+        $controller->processGoogleSignIn();
+        break;
+
     case 'verify_email':
         require_once CONTROLLER_PATH . 'AuthController.php';
         (new AuthController())->verifyEmail();
